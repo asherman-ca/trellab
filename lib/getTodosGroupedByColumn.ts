@@ -26,5 +26,26 @@ export const getTodosGroupedByColumn = async () => {
 		return acc
 	}, new Map<TypedColumn, Column>())
 
-	console.log('columns', columns)
+	// add empty todos for columns that don't have any
+	const columnTypes: TypedColumn[] = ['todo', 'inprogress', 'done']
+	columnTypes.forEach((type) => {
+		if (!columns.get(type)) {
+			columns.set(type, {
+				id: type,
+				todos: [],
+			})
+		}
+	})
+
+	const sortedColumns = new Map(
+		Array.from(columns.entries()).sort(
+			(a, b) => columnTypes.indexOf(a[0]) - columnTypes.indexOf(b[0])
+		)
+	)
+
+	const board: Board = {
+		columns: sortedColumns,
+	}
+
+	return board
 }
