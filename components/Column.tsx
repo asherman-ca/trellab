@@ -51,7 +51,7 @@ function Column({ id, todos, index }: Props) {
 												<TodoCard
 													todo={todo}
 													index={index}
-													id={todo.$id}
+													id={id}
 													innerRef={provided.innerRef}
 													draggableProps={provided.draggableProps}
 													dragHandleProps={provided.dragHandleProps}

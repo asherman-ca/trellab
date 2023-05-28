@@ -5,9 +5,10 @@ import { useBoardStore } from '@/store/BoardStore'
 import Column from './Column'
 
 function Board() {
-	const [board, getBoard] = useBoardStore((state) => [
+	const [board, getBoard, setBoardState] = useBoardStore((state) => [
 		state.board,
 		state.getBoard,
+		state.setBoardState,
 	])
 
 	useEffect(() => {
@@ -18,6 +19,15 @@ function Board() {
 
 	const handleOnDragEnd = (result: DropResult) => {
 		console.log(result)
+		const { destination, source, type } = result
+		if (!destination) return
+		if (type === 'column') {
+			const entries = Array.from(board.columns.entries())
+			const [removed] = entries.splice(source.index, 1)
+			entries.splice(destination.index, 0, removed)
+			const newColumns = new Map(entries)
+			setBoardState({ ...board, columns: newColumns })
+		}
 	}
 
 	return (
