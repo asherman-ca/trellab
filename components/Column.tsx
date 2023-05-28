@@ -1,5 +1,7 @@
 'use client'
 import { Draggable, Droppable } from 'react-beautiful-dnd'
+import TodoCard from './TodoCard'
+import { PlusCircleIcon } from '@heroicons/react/24/solid'
 
 type Props = {
 	id: TypedColumn
@@ -46,18 +48,24 @@ function Column({ id, todos, index }: Props) {
 											index={index}
 										>
 											{(provided) => (
-												<div
-													{...provided.draggableProps}
-													{...provided.dragHandleProps}
-													ref={provided.innerRef}
-												>
-													<div className='bg-white rounded-2xl shadow-sm p-2'>
-														<p className='text-gray-800'>{todo.title}</p>
-													</div>
-												</div>
+												<TodoCard
+													todo={todo}
+													index={index}
+													id={todo.$id}
+													innerRef={provided.innerRef}
+													draggableProps={provided.draggableProps}
+													dragHandleProps={provided.dragHandleProps}
+												/>
 											)}
 										</Draggable>
 									))}
+									{provided.placeholder}
+
+									<div className='flex justify-end p-2'>
+										<button className='text-green-500 hover:text-green-600'>
+											<PlusCircleIcon className='h-10 w-10' />
+										</button>
+									</div>
 								</div>
 							</div>
 						)}
