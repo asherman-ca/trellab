@@ -3,13 +3,17 @@ import { useEffect } from 'react'
 import { DragDropContext, DropResult, Droppable } from 'react-beautiful-dnd'
 import { useBoardStore } from '@/store/BoardStore'
 import Column from './Column'
+import { start } from 'repl'
 
 function Board() {
-	const [board, getBoard, setBoardState] = useBoardStore((state) => [
-		state.board,
-		state.getBoard,
-		state.setBoardState,
-	])
+	const [board, getBoard, setBoardState, updateTodoInDB] = useBoardStore(
+		(state) => [
+			state.board,
+			state.getBoard,
+			state.setBoardState,
+			state.updateTodoInDB,
+		]
+	)
 
 	useEffect(() => {
 		getBoard()
@@ -47,9 +51,11 @@ function Board() {
 			if (source.index === destination.index && startCol.id === finishCol.id)
 				return
 
+			// these two lines would be the mutable pattern to manipulate the initial object
 			// const [removed] = startCol.todos.splice(source.index, 1)
 			// finishCol.todos.splice(destination.index, 0, removed)
 
+			// immutable pattern so we don't manipulate initial object
 			const newTodos = startCol.todos
 			const [todoMoved] = newTodos.splice(source.index, 1)
 
@@ -63,19 +69,23 @@ function Board() {
 				newColumns.set(newCol.id, newCol)
 				setBoardState({ columns: newColumns })
 			} else {
-				const oldCol = {
+				const finishTodos = Array.from(finishCol.todos)
+				finishTodos.splice(destination.index, 0, todoMoved)
+
+				const newColumns = new Map(board.columns)
+				const newCol = {
 					id: startCol.id,
 					todos: newTodos,
 				}
-				const targetTodos = finishCol.todos
-				targetTodos.splice(destination.index, 0, todoMoved)
-				const newCol = {
+				newColumns.set(startCol.id, newCol)
+				newColumns.set(finishCol.id, {
 					id: finishCol.id,
-					todos: targetTodos,
-				}
-				const newColumns = new Map(board.columns)
-				newColumns.set(oldCol.id, oldCol)
-				newColumns.set(newCol.id, newCol)
+					todos: finishTodos,
+				})
+
+				// Update in DB
+				updateTodoInDB(todoMoved, finishCol.id)
+
 				setBoardState({ columns: newColumns })
 			}
 		}
