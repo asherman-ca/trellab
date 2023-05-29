@@ -18,7 +18,7 @@ function Board() {
 	console.log('board', board)
 
 	const handleOnDragEnd = (result: DropResult) => {
-		console.log(result)
+		// console.log(result)
 		const { destination, source, type } = result
 		if (!destination) return
 		if (type === 'column') {
@@ -27,6 +27,57 @@ function Board() {
 			entries.splice(destination.index, 0, removed)
 			const newColumns = new Map(entries)
 			setBoardState({ ...board, columns: newColumns })
+		}
+		if (type === 'card') {
+			const columns = Array.from(board.columns)
+			const startColIndex = columns[Number(source.droppableId)]
+			const endColIndex = columns[Number(destination.droppableId)]
+
+			const startCol: Column = {
+				id: startColIndex[0],
+				todos: startColIndex[1].todos,
+			}
+
+			const finishCol: Column = {
+				id: endColIndex[0],
+				todos: endColIndex[1].todos,
+			}
+
+			if (!startCol || !finishCol) return
+			if (source.index === destination.index && startCol.id === finishCol.id)
+				return
+
+			// const [removed] = startCol.todos.splice(source.index, 1)
+			// finishCol.todos.splice(destination.index, 0, removed)
+
+			const newTodos = startCol.todos
+			const [todoMoved] = newTodos.splice(source.index, 1)
+
+			if (startCol.id === finishCol.id) {
+				newTodos.splice(destination.index, 0, todoMoved)
+				const newCol = {
+					id: startCol.id,
+					todos: newTodos,
+				}
+				const newColumns = new Map(board.columns)
+				newColumns.set(newCol.id, newCol)
+				setBoardState({ columns: newColumns })
+			} else {
+				const oldCol = {
+					id: startCol.id,
+					todos: newTodos,
+				}
+				const targetTodos = finishCol.todos
+				targetTodos.splice(destination.index, 0, todoMoved)
+				const newCol = {
+					id: finishCol.id,
+					todos: targetTodos,
+				}
+				const newColumns = new Map(board.columns)
+				newColumns.set(oldCol.id, oldCol)
+				newColumns.set(newCol.id, newCol)
+				setBoardState({ columns: newColumns })
+			}
 		}
 	}
 
