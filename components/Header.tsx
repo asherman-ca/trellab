@@ -1,17 +1,34 @@
 'use client'
 import Image from 'next/image'
-import React from 'react'
+import { useEffect, useState } from 'react'
 import { MagnifyingGlassIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 import Avatar from 'react-avatar'
 import { useBoardStore } from '@/store/BoardStore'
+import fetchSuggestion from '@/lib/fetchSuggestion'
 
 function Header() {
-	const [searchString, setSearchingString] = useBoardStore((state) => [
+	const [board, searchString, setSearchingString] = useBoardStore((state) => [
+		state.board,
 		state.searchString,
 		state.setSearchString,
 	])
+	const [loading, setLoading] = useState<boolean>(false)
+	const [suggestion, setSuggestion] = useState<string>('')
 
-	// console.log('hits')
+	useEffect(() => {
+		if (board.columns.size === 0) return
+		setLoading(true)
+		const fetchSummary = async () => {
+			const suggestion = await fetchSuggestion(board)
+			setSuggestion(suggestion)
+			setLoading(false)
+		}
+		fetchSummary()
+	}, [board])
+
+	// TODO: debounce search string changes
+
+	console.log('suggestion is: ', suggestion)
 
 	return (
 		<header>
@@ -48,8 +65,12 @@ function Header() {
 
 			<div className='flex items-center justify-center py-2 px-5 md:py-5'>
 				<p className='flex items-center text-sm font-light shadow-xl rounded-xl bg-white italic max-w-3xl text-[#0055D1] w-fit p-5'>
-					<UserCircleIcon className='inline-block h-10 w-10 text-[#0055D1] mr-1' />
-					GPT is summarizing your data...
+					<UserCircleIcon
+						className={`inline-block h-10 w-10 text-[#0055D1] mr-1 ${
+							loading && 'animate-spin'
+						}`}
+					/>
+					{loading ? 'Generating summary...' : suggestion}
 				</p>
 			</div>
 		</header>
