@@ -29,8 +29,6 @@ function TaskTypeRadioGroup() {
 		state.setNewTaskType,
 	])
 
-	console.log('task type', newTaskType)
-
 	return (
 		<div className='w-full py-5'>
 			<div className='mx-auto w-full max-w-md'>
