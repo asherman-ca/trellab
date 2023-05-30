@@ -23,7 +23,7 @@ function Header() {
 			setSuggestion(suggestion)
 			setLoading(false)
 		}
-		// fetchSummary()
+		fetchSummary()
 	}, [board])
 
 	// TODO: debounce search string changes
